@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Gms.Common;
+using Android.Gms.Extensions;
 using Android.Locations;
 using Android.OS;
 using Android.Runtime;
@@ -14,47 +15,50 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Firebase.Iid;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 using TestApp.Managers;
+using WindowsAzure.Messaging;
 
 namespace TestApp.Droid.Activities
 {
     [Activity(Label = "VendorRegistration", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class VendorRegistrationActivity : AppCompatActivity
     {
-        private EditText firstNameEditText;
-        private EditText lastNameEditText;
-        private EditText emailEditText;
-        private EditText passwordEditText;
+        private TextView tokenTextView;
+        private TextView registrationIdTextView;
+        private EditText tagEditText;
+        private Button registerNotificationButton;
+        private EditText recieverTagEditText;
         private Button submitButton;
 
         public const string TAG = "VendorRegistrationActivity";
         internal static readonly string CHANNEL_ID = "my_notification_channel";
+
+        NotificationHub hub;
+        public const string ListenConnectionString = "Endpoint=sb://demoappshashank.servicebus.windows.net/;SharedAccessKeyName=DefaultListenSharedAccessSignature;SharedAccessKey=yzMpEcvONXIn6CkMk8X1fgaNY51rEgKa+oPcwF8ZaDQ=";
+        public const string NotificationHubName = "DemoApp";
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             SetContentView(Resource.Layout.VendorRegistrationLayout);
 
+
+            AppCenter.Start("b186992c-ac43-41c0-844f-672451c1ace6",
+                               typeof(Analytics), typeof(Crashes));
+
+
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
-            firstNameEditText = FindViewById<EditText>(Resource.Id.firstNameEditText);
-            lastNameEditText = FindViewById<EditText>(Resource.Id.lastNameEditText);
-            emailEditText = FindViewById<EditText>(Resource.Id.emailEditText);
-            passwordEditText = FindViewById<EditText>(Resource.Id.passwordEditText);
+            tokenTextView = FindViewById<TextView>(Resource.Id.tokenTextView);
+            registrationIdTextView = FindViewById<TextView>(Resource.Id.registrationIdTextView);
+            tagEditText = FindViewById<EditText>(Resource.Id.tagEditText);
+            registerNotificationButton = FindViewById<Button>(Resource.Id.registerForNotification);
+            recieverTagEditText = FindViewById<EditText>(Resource.Id.recieverTagEditText);
             submitButton = FindViewById<Button>(Resource.Id.submitButton);
-
-            if (Intent.Extras != null)
-            {
-                foreach (var key in Intent.Extras.KeySet())
-                {
-                    if (key != null)
-                    {
-                        var value = Intent.Extras.GetString(key);
-                        Log.Debug(TAG, "Key: {0} Value: {1}", key, value);
-                    }
-                }
-            }
 
             IsPlayServicesAvailable();
 #if DEBUG
@@ -64,25 +68,46 @@ namespace TestApp.Droid.Activities
                 FirebaseInstanceId.Instance.GetInstanceId();
             });
 #endif
+
+            GetToken();
+
             CreateNotificationChannel();
+        }
+
+        private async Task GetToken()
+        {
+            var instanceIdResult = await FirebaseInstanceId.Instance.GetInstanceId().AsAsync<IInstanceIdResult>();
+            tokenTextView.Text = instanceIdResult.Token;
         }
 
         protected override void OnResume()
         {
             base.OnResume();
+            registerNotificationButton.Click += RegisterNotificationButton_Click;
             submitButton.Click += SubmitButton_Click;
         }
 
         protected override void OnPause()
         {
             base.OnPause();
+            registerNotificationButton.Click -= RegisterNotificationButton_Click;
             submitButton.Click -= SubmitButton_Click;
+        }
+
+        private void RegisterNotificationButton_Click(object sender, EventArgs e)
+        {
+            hub = new NotificationHub(NotificationHubName,
+                                        ListenConnectionString, this);
+
+            var tags = new List<string>() { tagEditText.Text };
+            var regID = hub.Register(tokenTextView.Text, tags.ToArray()).RegistrationId;
+            registrationIdTextView.Text = regID;
         }
 
         private async void SubmitButton_Click(object sender, EventArgs e)
         {
-            VendorManager vendorManager = new VendorManager();
-            var t = await vendorManager.AddVendor(firstNameEditText.Text, lastNameEditText.Text, emailEditText.Text, passwordEditText.Text);
+            //VendorManager vendorManager = new VendorManager();
+            //var t = await vendorManager.AddVendor(tokenTextView.Text, tagEditText.Text, emailEditText.Text, passwordEditText.Text);
         }
 
         public bool IsPlayServicesAvailable()

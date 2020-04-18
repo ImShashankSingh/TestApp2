@@ -22,9 +22,6 @@ namespace TestApp.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
 
-            AppCenter.Start("b186992c-ac43-41c0-844f-672451c1ace6",
-                               typeof(Analytics), typeof(Crashes));
-
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 

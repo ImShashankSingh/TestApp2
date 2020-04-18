@@ -1,33 +1,45 @@
-<?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView  
+        android:text="Token"
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:id="@+id/tokenTextView" />  
+
     <EditText  
         android:layout_width="match_parent"  
         android:layout_height="wrap_content"  
-        android:id="@+id/firstNameEditText"  
-        android:inputType="text" />  
+        android:id="@+id/tagEditText" 
+        android:hint="Tag to register"
+        android:inputType="text" /> 
+
+    <Button  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:id="@+id/registerForNotification"  
+        android:text="Register for notification" />  
+    
+    <TextView  
+        android:text="RegistrationId"
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:id="@+id/registrationIdTextView" />  
+
+
     <EditText  
         android:layout_width="match_parent"  
         android:layout_height="wrap_content"  
-        android:id="@+id/lastNameEditText"  
-        android:inputType="text" />  
-    <EditText  
-        android:layout_width="match_parent"  
-        android:layout_height="wrap_content"  
-        android:id="@+id/emailEditText"  
-        android:inputType="textEmailAddress" />  
-    <EditText  
-        android:layout_width="match_parent"  
-        android:layout_height="wrap_content"  
-        android:id="@+id/passwordEditText"  
-        android:inputType="textPassword" />  
+        android:id="@+id/recieverTagEditText" 
+        android:hint="Tag of reciever"
+        android:inputType="text" /> 
 
     <Button  
         android:layout_width="match_parent"  
         android:layout_height="wrap_content"  
         android:id="@+id/submitButton"  
-        android:text="Submit" />  
+        android:text="Send notification" />  
 </LinearLayout>

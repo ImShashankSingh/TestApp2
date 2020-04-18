@@ -23,17 +23,12 @@ namespace TestApp.Droid.Services
     [IntentFilter(new[] { "com.google.firebase.INSTANCE_ID_EVENT" })]
     public class MyFirebaseMessagingService : FirebaseMessagingService
     {
-        const string TAG = "MyFirebaseMsgService";
-        NotificationHub hub;
-        public const string ListenConnectionString = "Endpoint=sb://demoappshashank.servicebus.windows.net/;SharedAccessKeyName=DefaultListenSharedAccessSignature;SharedAccessKey=yzMpEcvONXIn6CkMk8X1fgaNY51rEgKa+oPcwF8ZaDQ=";
-        public const string NotificationHubName = "DemoApp";
+        
         public override void OnMessageReceived(RemoteMessage message)
         {
-            Log.Debug(TAG, "From: " + message.From);
             if (message.GetNotification() != null)
             {
                 //These is how most messages will be received
-                Log.Debug(TAG, "Notification Message Body: " + message.GetNotification().Body);
                 SendNotification(message.GetNotification().Body);
             }
             else
@@ -64,23 +59,16 @@ namespace TestApp.Droid.Services
             notificationManager.Notify(0, notificationBuilder.Build());
         }
 
-        public override void OnNewToken(string token)
-        {
-            Log.Debug(TAG, "FCM token: " + token);
-            SendRegistrationToServer(token);
-        }
+        //public override void OnNewToken(string token)
+        //{
+        //    SendRegistrationToServer(token);
+        //}
 
-        void SendRegistrationToServer(string token)
-        {
-            // Register with Notification Hubs
-            hub = new NotificationHub(NotificationHubName,
-                                        ListenConnectionString, this);
-
-
-            var tags = new List<string>() { };
-            var regID = hub.Register(token, tags.ToArray()).RegistrationId;
-
-            Log.Debug(TAG, $"Successful registration of ID {regID}");
-        }
+        //void SendRegistrationToServer(string token)
+        //{
+        //    // Register with Notification Hubs
+            
+        //    Log.Debug(TAG, $"Successful registration of ID {regID}");
+        //}
     }
 }
