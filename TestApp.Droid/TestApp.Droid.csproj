@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Activities\VendorRegistrationActivity.cs" />
     <Compile Include="Helper\Constants.cs" />
+    <Compile Include="Helper\SharedPrefrences.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

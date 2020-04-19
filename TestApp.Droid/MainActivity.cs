@@ -9,12 +9,18 @@ using Android.Widget;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using TestApp.Droid.Activities;
+using TestApp.Droid.Helper;
+using TestApp.Managers;
 
 namespace TestApp.Droid
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = false)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        EditText emailEditText;
+        EditText passwordEditText;
+        Button loginButton;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -22,42 +28,36 @@ namespace TestApp.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
 
-            Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-            SetSupportActionBar(toolbar);
-
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
+            emailEditText = FindViewById<EditText>(Resource.Id.emailEditText);
+            passwordEditText = FindViewById<EditText>(Resource.Id.passwordEditText);
+            loginButton = FindViewById<Button>(Resource.Id.loginButton);
         }
 
-        public override bool OnCreateOptionsMenu(IMenu menu)
+        protected override void OnResume()
         {
-            MenuInflater.Inflate(Resource.Menu.menu_main, menu);
-            return true;
+            base.OnResume();
+            loginButton.Click += LoginButton_Click;
         }
 
-        public override bool OnOptionsItemSelected(IMenuItem item)
+        protected override void OnPause()
         {
-            int id = item.ItemId;
-            if (id == Resource.Id.action_settings)
+            base.OnPause();
+            loginButton.Click -= LoginButton_Click;
+        }
+        private async void LoginButton_Click(object sender, EventArgs e)
+        {
+            APIManager aPIManager = new APIManager();
+            var response = await aPIManager.Login(emailEditText.Text, passwordEditText.Text);
+
+            if (response.IsSuccess)
             {
-                return true;
+                SharedPreferences.Instance.JwtToken = response.Data.Token;
+                SharedPreferences.Instance.EmailId = response.Data.Token;
+                TestApp.Helper.AppSecurity.Token = response.Data.Token;
+                StartActivity(typeof(VendorRegistrationActivity));
+                Finish();
             }
-
-            return base.OnOptionsItemSelected(item);
         }
-
-        private void FabOnClick(object sender, EventArgs eventArgs)
-        {
-            View view = (View) sender;
-            Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
-                .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
-        }
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-	}
+    }
 }
 

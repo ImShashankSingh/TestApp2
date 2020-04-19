@@ -23,7 +23,7 @@ using WindowsAzure.Messaging;
 
 namespace TestApp.Droid.Activities
 {
-    [Activity(Label = "VendorRegistration", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
+    [Activity(Label = "VendorRegistration", Theme = "@style/AppTheme.NoActionBar", MainLauncher = false)]
     public class VendorRegistrationActivity : AppCompatActivity
     {
         private TextView tokenTextView;
@@ -32,7 +32,7 @@ namespace TestApp.Droid.Activities
         private Button registerNotificationButton;
         private EditText recieverTagEditText;
         private Button submitButton;
-
+        APIManager vendorManager;
         public const string TAG = "VendorRegistrationActivity";
         internal static readonly string CHANNEL_ID = "my_notification_channel";
 
@@ -50,9 +50,6 @@ namespace TestApp.Droid.Activities
                                typeof(Analytics), typeof(Crashes));
 
 
-            Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-            SetSupportActionBar(toolbar);
-
             tokenTextView = FindViewById<TextView>(Resource.Id.tokenTextView);
             registrationIdTextView = FindViewById<TextView>(Resource.Id.registrationIdTextView);
             tagEditText = FindViewById<EditText>(Resource.Id.tagEditText);
@@ -68,6 +65,7 @@ namespace TestApp.Droid.Activities
                 FirebaseInstanceId.Instance.GetInstanceId();
             });
 #endif
+            vendorManager = new APIManager();
 
             GetToken();
 
@@ -94,20 +92,21 @@ namespace TestApp.Droid.Activities
             submitButton.Click -= SubmitButton_Click;
         }
 
-        private void RegisterNotificationButton_Click(object sender, EventArgs e)
+        private async void RegisterNotificationButton_Click(object sender, EventArgs e)
         {
-            hub = new NotificationHub(NotificationHubName,
-                                        ListenConnectionString, this);
-
-            var tags = new List<string>() { tagEditText.Text };
-            var regID = hub.Register(tokenTextView.Text, tags.ToArray()).RegistrationId;
-            registrationIdTextView.Text = regID;
+            //var tags = new List<string>() { tagEditText.Text };
+            var param = new { platform = "gcm", handle = tokenTextView.Text, userType = "Vendor", userEmail = tagEditText.Text };
+            //var regID = hub.Register(tokenTextView.Text, tags.ToArray()).RegistrationId;
+            var regId = await vendorManager.RegisterForNotification(param);
+            registrationIdTextView.Text = regId.Data;
         }
 
         private async void SubmitButton_Click(object sender, EventArgs e)
         {
             //VendorManager vendorManager = new VendorManager();
             //var t = await vendorManager.AddVendor(tokenTextView.Text, tagEditText.Text, emailEditText.Text, passwordEditText.Text);
+            var response = await vendorManager.SendNotification(recieverTagEditText.Text);
+            recieverTagEditText.Text = "Notification sent";
         }
 
         public bool IsPlayServicesAvailable()
