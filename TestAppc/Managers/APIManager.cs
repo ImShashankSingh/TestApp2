@@ -29,7 +29,8 @@ namespace TestApp.Managers
 
         public async Task<IRestResult<string>> SendNotification(string recieverTag, CancellationTokenSource cancellationTokenSource = default(CancellationTokenSource))
         {
-            return await RestAPI.PostAsync<string>("/api/User/NotificationToVendor" + recieverTag, cancellationTokenSource);
+            var param = new { tagOfReciver = recieverTag };
+            return await RestAPI.QueryPostAsync<string>("/api/User/NotificationToVendor?recieverTag=" + recieverTag, cancellationTokenSource);
         }
     }
 

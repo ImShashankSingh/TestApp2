@@ -115,6 +115,30 @@ namespace TestApp.Services
             }
         }
 
+        public static async Task<IRestResult<T>> QueryPostAsync<T>(string uri, CancellationTokenSource cancellationToken = default(CancellationTokenSource))
+        {
+            timer = new Timer(OnTimerCallback, null, 0, 2000);
+            if (cancellationToken == null)
+                cancellationTokenSource = new CancellationTokenSource();
+            else
+                cancellationTokenSource = cancellationToken;
+            try
+            {
+                using (var client = CreateHttpClient())
+                {
+                    var response = await client.PostAsync(APIConstants.BaseURL + uri, null, cancellationTokenSource.Token);
+                    timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                    return await HandleResponse<T>(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                return ErrorResult<T>(ex.Message, 500);
+
+            }
+        }
+
         /// <summary>
         /// Send GET Request with parameters as query string to uri.
         /// </summary>

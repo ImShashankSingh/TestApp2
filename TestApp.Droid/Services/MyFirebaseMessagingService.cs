@@ -29,17 +29,16 @@ namespace TestApp.Droid.Services
             if (message.GetNotification() != null)
             {
                 //These is how most messages will be received
-                SendNotification(message.GetNotification().Body);
+                SendNotification(message);//.GetNotification().Body
             }
             else
             {
                 //Only used for debugging payloads sent from the Azure portal
-                SendNotification(message.Data.Values.First());
-
+                SendNotification(message);//.Data.Values.First()
             }
         }
 
-        void SendNotification(string messageBody)
+        void SendNotification(RemoteMessage messageBody)
         {
             var intent = new Intent(this, typeof(VendorRegistrationActivity));
             intent.AddFlags(ActivityFlags.ClearTop);
@@ -47,9 +46,9 @@ namespace TestApp.Droid.Services
 
             var notificationBuilder = new NotificationCompat.Builder(this, VendorRegistrationActivity.CHANNEL_ID);
 
-            notificationBuilder.SetContentTitle("FCM Message")
+            notificationBuilder.SetContentTitle(messageBody.GetNotification().Title)
                         .SetSmallIcon(Resource.Drawable.ic_launcher)
-                        .SetContentText(messageBody)
+                        .SetContentText(messageBody.GetNotification().Body)
                         .SetAutoCancel(true)
                         .SetShowWhen(false)
                         .SetContentIntent(pendingIntent);
